@@ -791,6 +791,11 @@ apply_all_in_dir() {
     echo "WINE: -PIPEWIRE- add winepipewire.drv"
     apply_all_in_dir "../patches/wine-hotfixes/winepipewire/"
 
+    # aarch64 hosts with 16K pages (FEX, ARM64EC and WoW64): a wild pointer in RtlIsEcCode, an alert a WoW64
+    # thread's host side took, NtYieldExecution sleeping, and Wine as a 4K process on a kernel with per-process page sizes
+    echo "WINE: -AARCH64- our ntdll fixes"
+    apply_all_in_dir "../patches/wine-hotfixes/m3/"
+
     echo "WINE: RUN AUTOCONF TOOLS/MAKE_REQUESTS"
     autoreconf -f
     ./tools/make_requests
@@ -801,3 +806,13 @@ apply_all_in_dir() {
 
 ### END PROTON-GE ADDITIONAL CUSTOM PATCHES ###
 ### END WINE PATCHING ###
+
+### (3) FEX PATCHING ###
+
+    # no FPCR write at an ARM64EC exit when nothing changed; no preserve_all on MinGW (clang 23 lays its frame out wrong)
+    pushd FEX
+    echo "FEX: -AARCH64- our fixes"
+    apply_all_in_dir "../patches/fex-m3/"
+    popd
+
+### END FEX PATCHING ###
